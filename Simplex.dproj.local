@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2015/09/11 21:25:14.000.162,=D:\Arquivos do Sistema\Arquivos\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2015/09/11 22:28:28.000.817,D:\Arquivos do Sistema\Arquivos\Documents\Embarcadero\Studio\Projects\Simplex\uSimplex.dfm=D:\Arquivos do Sistema\Arquivos\Documents\Embarcadero\Studio\Projects\Unit2.dfm</Transaction>
+    <Transaction>2015/09/11 22:28:28.000.817,D:\Arquivos do Sistema\Arquivos\Documents\Embarcadero\Studio\Projects\Simplex\uSimplex.pas=D:\Arquivos do Sistema\Arquivos\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2015/09/11 22:28:49.000.473,D:\Arquivos do Sistema\Arquivos\Documents\Embarcadero\Studio\Projects\Simplex\Simplex.dproj=D:\Arquivos do Sistema\Arquivos\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2015/09/15 16:49:17.000.267,=D:\Arquivos do Sistema\Arquivos\Documents\Embarcadero\Studio\Projects\Simplex\Unit1.pas</Transaction>
+    <Transaction>2015/09/15 16:52:51.000.037,D:\Arquivos do Sistema\Arquivos\Documents\Embarcadero\Studio\Projects\Simplex\uIteracoes.pas=D:\Arquivos do Sistema\Arquivos\Documents\Embarcadero\Studio\Projects\Simplex\Unit1.pas</Transaction>
+    <Transaction>2015/09/15 16:52:51.000.037,D:\Arquivos do Sistema\Arquivos\Documents\Embarcadero\Studio\Projects\Simplex\uIteracoes.dfm=D:\Arquivos do Sistema\Arquivos\Documents\Embarcadero\Studio\Projects\Simplex\Unit1.dfm</Transaction>
+    <Transaction>2015/09/15 17:03:47.000.272,D:\Arquivos do Sistema\Arquivos\Documents\Embarcadero\Studio\Projects\Simplex\uIteracoes.pas=</Transaction>
+  </Transactions>
+</BorlandProject>

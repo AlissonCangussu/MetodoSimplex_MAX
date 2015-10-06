@@ -1,0 +1,300 @@
+unit uSimplex;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids, Vcl.ExtCtrls,
+  Vcl.ComCtrls, Enter;
+
+type
+  TfrmSimplex = class(TForm)
+    pnl1: TPanel;
+    edtRestricoes: TEdit;
+    edtVariaveis: TEdit;
+    lbl1: TLabel;
+    lbl2: TLabel;
+    grdSimplex: TStringGrid;
+    btnGrid: TButton;
+    btnCalcular: TButton;
+    statResultado: TStatusBar;
+    MREnter1: TMREnter;
+    btnIteracoes: TButton;
+    procedure btnGridClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure btnCalcularClick(Sender: TObject);
+    procedure GravaTxt();
+    procedure CalculaSimplex();
+    function CompletaString(S: string; Ch: Char; Len: Integer): string;
+    procedure grdSimplexSelectCell(Sender: TObject; ACol, ARow: Integer;
+      var CanSelect: Boolean);
+    procedure btnIteracoesClick(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmSimplex: TfrmSimplex;
+
+implementation
+
+{$R *.dfm}
+
+function TfrmSimplex.CompletaString(S: string; Ch: Char; Len: Integer): string;
+var   RestLen: Integer;
+begin   Result  := S;
+  RestLen := Len - Length(s);
+  if RestLen < 1 then Exit;
+  Result := StringOfChar(Ch, RestLen) + S;
+end;
+
+procedure TfrmSimplex.CalculaSimplex;
+var
+  linha,coluna,i,j:Integer;
+  menor,divisao,mdivisao,pivo,fCoef:double;
+begin
+  menor := 999999999;
+  mdivisao := 999999999;
+
+  // Localiza a coluna do pivô,
+  linha := grdSimplex.RowCount - 1;
+  for I := 1 to grdSimplex.ColCount - 2 do
+  begin
+     if menor > StrToFloat(grdSimplex.Cells[i,linha]) then
+     begin
+       menor :=StrToFloat(grdSimplex.Cells[i,linha]);
+       coluna := i;
+     end;
+  end;
+  // Identifica a linha do pivô;
+  for I := 1 to grdSimplex.RowCount - 2 do
+  begin
+     if (grdSimplex.Cells[grdSimplex.ColCount-1,i] <> '0') and
+        (grdSimplex.Cells[coluna,i] <> '0') then
+        divisao := StrToFloat(grdSimplex.Cells[grdSimplex.ColCount-1,i])/StrToFloat(grdSimplex.Cells[coluna,i]);
+     if (divisao > 0) and (mdivisao > divisao) then
+     begin
+       mdivisao := divisao;
+       pivo := StrToFloat(grdSimplex.Cells[coluna,i]);
+       linha := i;
+     end;
+  end;
+ // Divide toda a linha do pivô por ele mesmo para torná-lo unitário
+  for I := 1 to grdSimplex.ColCount - 1 do
+  begin
+    if grdSimplex.Cells[i,linha] <> '0' then
+    begin
+      grdSimplex.Cells[i,linha] := FloatToStr(StrToFloat(grdSimplex.Cells[i,linha])/pivo);
+    end;
+  end;
+  // [Item Corrente] = [Item Corrente] – [Valor da linha atual que se encontra na
+  //  mesma coluna do pivo (valor antes de iniciar estes calculos) ] * [ Valor da
+  // coluna atual que se encontra na mesma linha do pivo ]
+  for I := 1 to grdSimplex.RowCount - 1 do
+  begin
+    if i <> linha then
+    begin
+      fCoef := StrToFloat(grdSimplex.Cells[coluna,i]);
+      for J := 1 to grdSimplex.ColCount - 1 do
+      begin
+         grdSimplex.Cells[j,i] := grdSimplex.Cells[j,i];
+         grdSimplex.Cells[j,i] := FloatToStr(StrToFloat(grdSimplex.Cells[j,i]) - fCoef *
+                                             StrToFloat(grdSimplex.Cells[j,linha]));
+      end;
+    end
+    else
+    begin
+      grdSimplex.Cells[0,i] := grdSimplex.Cells[coluna,0];
+    end;
+  end;
+  grdSimplex.Refresh;
+  for I := 1 to grdSimplex.ColCount - 1 do
+  begin
+    if Pos('-',grdSimplex.Cells[i,grdSimplex.RowCount - 1]) > 0 then
+    begin
+      GravaTxt();
+      CalculaSimplex();
+    end;
+  end;
+end;
+
+
+procedure TfrmSimplex.GravaTxt;
+var
+  i,j:Integer;
+  arq : TextFile;
+begin
+  //Grava num arquivo TXT
+  AssignFile(arq, 'd:\Simplex.txt');
+  {$I-}
+  Reset(arq);
+  {$I+}
+  if (IOResult <> 0) then
+    Rewrite(arq)
+  else
+  begin
+    CloseFile(arq);
+    Append(arq);
+  end;
+  for I := 0 to grdSimplex.RowCount - 1 do
+  begin
+    for J := 0 to grdSimplex.ColCount - 1 do
+    begin
+       write(arq,CompletaString(grdSimplex.Cells[j,i],' ', 10),'|');
+    end;
+    Writeln(arq,'');
+  end;
+  Writeln(arq,sLineBreak);
+  CloseFile(arq);
+end;
+
+procedure TfrmSimplex.grdSimplexSelectCell(Sender: TObject; ACol, ARow: Integer;
+  var CanSelect: Boolean);
+begin
+  CanSelect := not (ARow = 0) and not (ACol = 0);
+end;
+
+procedure TfrmSimplex.btnIteracoesClick(Sender: TObject);
+begin
+  winExec('Notepad.exe d:\Simplex.txt', sw_shownormal);
+end;
+
+procedure TfrmSimplex.btnCalcularClick(Sender: TObject);
+var
+  i:Integer;
+  parada:Boolean;
+begin
+  for I := 1 to grdSimplex.ColCount - 1 do
+  begin
+    if Pos('-',grdSimplex.Cells[i,grdSimplex.RowCount - 1]) > 0 then
+    begin
+      parada := True;
+    end;
+  end;
+  if parada = True then
+  begin
+    DeleteFile('d:\Simplex.txt');
+    GravaTxt();
+    CalculaSimplex();
+    GravaTxt();
+    winExec('Notepad.exe d:\Simplex.txt', sw_shownormal);
+    statResultado.Panels[0].Text := '';
+    for I := 1 to grdSimplex.RowCount - 1 do
+    begin
+      statResultado.Panels[0].Text := statResultado.Panels[0].Text + ' ' + grdSimplex.Cells[0,i]
+                                      + ' = ' + grdSimplex.Cells[grdSimplex.ColCount - 1,i] + '|';
+    end;
+    btnIteracoes.Visible := True;
+  end
+  else
+  begin
+    Application.MessageBox('Verifique se está na forma padrão!', 'Atenção',MB_OK + MB_ICONSTOP);
+  end;
+end;
+
+procedure TfrmSimplex.btnGridClick(Sender: TObject);
+var
+ variaveis, restricoes,i,j,linha,cont:Integer;
+ Selecao: TGridRect;
+begin
+  if (edtRestricoes.Text <> '') and (edtVariaveis.Text <> '') then
+  begin
+    variaveis := StrToInt(edtVariaveis.Text);
+    restricoes := StrToInt(edtRestricoes.Text);
+
+    for I := 0 to grdSimplex.RowCount -1 do
+      grdSimplex.Rows[I].Clear;
+
+    grdSimplex.ColCount := variaveis+restricoes+2;
+    grdSimplex.RowCount := restricoes+2;
+
+    //Preenche Grid
+    cont := 1;
+    grdSimplex.Cols[0].Add('Base');
+    for I := 1 to variaveis + restricoes do
+    begin
+      if i <= variaveis then
+        grdSimplex.Cols[i].Add('X'+inttostr(i))
+      else
+      begin
+        grdSimplex.Cols[i].Add('F'+inttostr(cont));
+        grdSimplex.Cells[i,cont] := '1';
+        cont := cont + 1;
+      end;
+    end;
+    grdSimplex.Cols[variaveis+restricoes+1].Add('R');
+
+    for I := 1 to restricoes do
+    begin
+      grdSimplex.Cells[0,i] := 'F'+inttostr(i);
+    end;
+    grdSimplex.Cells[0,restricoes+1] := 'Z';
+
+    for I := 1 to grdSimplex.RowCount - 1 do
+    begin
+      for J := 1 to grdSimplex.ColCount - 1 do
+      begin
+        if grdSimplex.Cells[j,i].IsEmpty then
+        begin
+          grdSimplex.Cells[j,i] := '0';
+        end;
+      end;
+    end;
+
+    //Foco na Celula[1,1]
+    with grdSimplex do
+    begin
+      SetFocus;
+      Row := 1;
+      Col := 1;
+      Selecao.Top := 1;
+      Selecao.Left := 1;
+      Selecao.Bottom := 1;
+      Selecao.Right := 1;
+      Selection := Selecao;
+    end;
+    btnCalcular.Enabled := True;
+  end
+  else
+  begin
+    if edtVariaveis.Text = '' then
+    begin
+      Application.MessageBox('Insira a quantidade de variáveis!', 'Atenção',MB_OK + MB_ICONWARNING);
+      edtVariaveis.SetFocus;
+    end
+    else if edtRestricoes.Text = '' then
+    begin
+      Application.MessageBox('Insira a quantidade de restrições!', 'Atenção',MB_OK + MB_ICONWARNING);
+      edtRestricoes.SetFocus;
+    end;
+  end;
+end;
+procedure TfrmSimplex.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if Key = VK_F1 then
+  begin
+    btnGridClick(Self);
+  end;
+  if Key = VK_F2 then
+  begin
+    if btnCalcular.Enabled = True then
+      btnCalcularClick(Self);
+  end;
+  if Key = VK_F3 then
+  begin
+    if btnIteracoes.Visible = True then
+      btnIteracoesClick(Self);
+  end;
+
+end;
+
+procedure TfrmSimplex.FormShow(Sender: TObject);
+begin
+  edtVariaveis.SetFocus;
+end;
+
+end.

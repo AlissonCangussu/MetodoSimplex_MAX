@@ -1,0 +1,16 @@
+program Simplex;
+
+uses
+  Vcl.Forms,
+  uSimplex in 'uSimplex.pas' {frmSimplex},
+  uIteracoes in 'uIteracoes.pas' {frmIteracoes};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmSimplex, frmSimplex);
+  Application.CreateForm(TfrmIteracoes, frmIteracoes);
+  Application.Run;
+end.
